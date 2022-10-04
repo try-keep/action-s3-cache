@@ -54,7 +54,7 @@ jobs:
           action: put
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ secrets.AWS_REGION }}
           bucket: ${{ secrets.AWS_BUCKET }}
           key: ${{ hashFiles('action.yml') }}-${{ matrix.os }}
           artifacts: |
@@ -70,7 +70,7 @@ jobs:
           action: get
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ secrets.AWS_REGION }}
           bucket: ${{ secrets.AWS_BUCKET }}
           key: ${{ hashFiles('action.yml') }}-${{ matrix.os }}
 
@@ -84,6 +84,6 @@ jobs:
           action: delete
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ secrets.AWS_REGION }}
           bucket: ${{ secrets.AWS_BUCKET }}
           key: ${{ hashFiles('action.yml') }}-${{ matrix.os }}
