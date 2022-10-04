@@ -38,7 +38,7 @@ jobs:
         env:
           GOARCH: amd64
           GOOS: ${{ steps.vars.outputs.GOOS }}
-        run: go build -o dist/$(echo "${{ runner.os }}" | tr "[:upper:]" "[:lower:]")
+        run: go build -o dist/$(echo "${{ runner.os }}" | tr "[:upper:]" "[:lower:]") ./src
         shell: bash
 
       - name: Create temp files
