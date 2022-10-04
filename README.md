@@ -13,9 +13,10 @@
     bucket: your-bucket
     s3-class: ONEZONE_IA # It's STANDARD by default. It can be either STANDARD,
     # REDUCED_REDUDANCY, ONEZONE_IA, INTELLIGENT_TIERING, GLACIER, DEEP_ARCHIVE or STANDARD_IA.
-    key: ${{ hashFiles('yarn.lock') }}
+    key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+    default-key: ${{ runner.os }}-yarn
     artifacts: |
-      node_modules*
+      node_modules/*
 ```
 
 ### Retrieving artifacts
@@ -29,7 +30,8 @@
     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     aws-region: us-east-1
     bucket: your-bucket
-    key: ${{ hashFiles('yarn.lock') }}
+    key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+    default-key: ${{ runner.os }}-yarn
 ```
 
 ### Clear cache
@@ -43,7 +45,8 @@
     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     aws-region: us-east-1
     bucket: your-bucket
-    key: ${{ hashFiles('yarn.lock') }}
+    key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+    default-key: ${{ runner.os }}-yarn
 ```
 
 ## Example
@@ -62,7 +65,8 @@ The following example shows a simple pipeline using S3 Cache GitHub Action:
     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     aws-region: us-east-1
     bucket: your-bucket
-    key: ${{ hashFiles('yarn.lock') }}
+    key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+    default-key: ${{ runner.os }}-yarn
 
 - name: Install dependencies
   run: yarn
@@ -76,7 +80,8 @@ The following example shows a simple pipeline using S3 Cache GitHub Action:
     aws-region: us-east-1
     bucket: your-bucket
     s3-class: STANDARD_IA
-    key: ${{ hashFiles('yarn.lock') }}
+    key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+    default-key: ${{ runner.os }}-yarn
     artifacts: |
       node_modules/*
 ```
