@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -116,10 +115,6 @@ func Unzip(filename string) error {
 		}
 		target := filepath.ToSlash(header.Name)
 
-		if !hasValidRelPath(header.Name) {
-			return fmt.Errorf("TAR contained invalid name, %q", target)
-		}
-
 		if header.Typeflag == tar.TypeReg {
 			// Create the directory that contains it
 			dir := filepath.Dir(target)
@@ -160,11 +155,4 @@ func getReadableBytes(b int64) string {
 	}
 	return fmt.Sprintf("%.1f %cB",
 		float64(b)/float64(div), "kMGTPE"[exp])
-}
-
-func hasValidRelPath(p string) bool {
-	if p == "" || strings.Contains(p, `\`) || strings.HasPrefix(p, "/") || strings.Contains(p, "../") {
-		return false
-	}
-	return true
 }
