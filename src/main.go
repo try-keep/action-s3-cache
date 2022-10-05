@@ -42,6 +42,7 @@ func main() {
 			log.Fatal(err)
 		}
 	case GetAction:
+		log.Printf("Attempting to restore %s", action.Key)
 		exists, err := ObjectExists(action.Key, action.Bucket)
 		if err != nil {
 			log.Fatal(err)
@@ -49,6 +50,7 @@ func main() {
 		// Get and and unzip
 		var filename string
 		if exists {
+			log.Print("Cache hit, starting download")
 			err = GetObject(action.Key, action.Bucket)
 			if err != nil {
 				log.Fatal(err)
@@ -59,10 +61,12 @@ func main() {
 			log.Printf("Querying for cache matching default key: %s", action.DefaultKey)
 			filename, err = GetLatestObject(action.DefaultKey, action.Bucket)
 			if err != nil {
-				log.Fatal(err)
+				log.Print(err)
+				log.Print("Skipping cache download")
+				return
 			}
 			log.Printf("Defaulting to latest similar key: %s", filename)
-			// err = GetObject(filename, action.Bucket)
+			err = GetObject(action.Key, action.Bucket)
 			if err != nil {
 				log.Fatal(err)
 			}
