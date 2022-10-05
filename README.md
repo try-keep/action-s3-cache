@@ -1,5 +1,8 @@
 # S3 Cache for GitHub Actions
 
+[![Release](https://github.com/try-keep/action-s3-cache/actions/workflows/build_and_publish.yml/badge.svg?branch=main)](https://github.com/try-keep/action-s3-cache/actions/workflows/build_and_publish.yml)
+[![Test](https://github.com/try-keep/action-s3-cache/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/try-keep/action-s3-cache/actions/workflows/test.yml)
+
 ### Archiving artifacts
 
 ```yml
