@@ -128,7 +128,7 @@ func Unzip(filename string) error {
 			}
 
 			// Write the file
-			fileToWrite, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			fileToWrite, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR|os.O_TRUNC, os.FileMode(header.Mode))
 			if err != nil {
 				log.Printf("Failed creating %s", target)
 				panic(err)
