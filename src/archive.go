@@ -3,13 +3,14 @@ package main
 import (
 	"archive/tar"
 	"bytes"
-	"compress/gzip"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	gzip "github.com/klauspost/pgzip"
 )
 
 // Zip - Create .zip file and add dirs and files that match glob patterns
