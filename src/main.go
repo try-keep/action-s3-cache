@@ -51,10 +51,6 @@ func main() {
 		var filename string
 		if exists {
 			log.Print("Cache hit, starting download")
-			err = GetObject(action.Key, action.Bucket)
-			if err != nil {
-				log.Fatal(err)
-			}
 			filename = action.Key
 		} else {
 			log.Printf("No caches found for the following key: %s", action.Key)
@@ -66,10 +62,10 @@ func main() {
 				return
 			}
 			log.Printf("Defaulting to latest similar key: %s", filename)
-			err = GetObject(action.Key, action.Bucket)
-			if err != nil {
-				log.Fatal(err)
-			}
+		}
+		err = GetObject(filename, action.Bucket)
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		if err := Unzip(filename); err != nil {
