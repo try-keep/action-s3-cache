@@ -13,6 +13,9 @@ inputs:
   aws-secret-access-key:
     description: "AWS secret access key to access your bucket"
     required: false
+  aws-session-token:
+    description: "AWS session token to access your bucket"
+    required: false
   aws-region:
     description: "AWS region where your bucket is located"
     required: true
@@ -41,6 +44,7 @@ runs:
         ACTION: ${{ inputs.action }}
         AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
+        AWS_SESSION_TOKEN: ${{ inputs.aws-session-token }}
         AWS_REGION: ${{ inputs.aws-region }}
         BUCKET: ${{ inputs.bucket }}
         S3_CLASS: ${{ inputs.s3-class }}
