@@ -153,7 +153,7 @@ func ObjectExists(key, bucket string) (bool, error) {
 
 func getSession() (*s3.Client, error) {
 	sessionToken := os.Getenv("AWS_SESSION_TOKEN")
-	if sessionToken != "" {
+	if sessionToken == "" {
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		if err != nil {
 			return nil, err
@@ -162,6 +162,9 @@ func getSession() (*s3.Client, error) {
 		return s3.NewFromConfig(cfg), nil
 	}
 	log.Print("Static creds")
+	log.Print(os.Getenv("AWS_REGION"))
+	log.Print(os.Getenv("AWS_ACCESS_KEY_ID"))
+	log.Print(os.Getenv("AWS_SESSION_TOKEN"))
 	session := s3.NewFromConfig(aws.Config{
 		Region: os.Getenv("AWS_REGION"),
 		Credentials: credentials.NewStaticCredentialsProvider(
