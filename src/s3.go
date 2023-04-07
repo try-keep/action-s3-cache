@@ -11,15 +11,14 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
 func GetLatestObject(key, bucket string) (string, error) {
-	session, err := getSession()
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	session := s3.NewFromConfig(cfg)
 	if err != nil {
-		log.Fatal(err)
 		return "", err
 	}
 
@@ -46,9 +45,9 @@ func GetLatestObject(key, bucket string) (string, error) {
 
 // PutObject - Upload object to s3 bucket
 func PutObject(key, bucket, s3Class string) error {
-	session, err := getSession()
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	session := s3.NewFromConfig(cfg)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
@@ -83,11 +82,12 @@ func PutObject(key, bucket, s3Class string) error {
 // GetObject - Get object from s3 bucket
 func GetObject(key, bucket string) error {
 	start := time.Now()
-	session, err := getSession()
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
+
+	session := s3.NewFromConfig(cfg)
 
 	i := &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
@@ -112,11 +112,11 @@ func GetObject(key, bucket string) error {
 
 // DeleteObject - Delete object from s3 bucket
 func DeleteObject(key, bucket string) error {
-	session, err := getSession()
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
+	session := s3.NewFromConfig(cfg)
 
 	i := &s3.DeleteObjectInput{
 		Bucket: aws.String(bucket),
@@ -133,11 +133,11 @@ func DeleteObject(key, bucket string) error {
 
 // ObjectExists - Verify if object exists in s3
 func ObjectExists(key, bucket string) (bool, error) {
-	session, err := getSession()
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		log.Fatal(err)
 		return false, err
 	}
+	session := s3.NewFromConfig(cfg)
 
 	i := &s3.HeadObjectInput{
 		Bucket: aws.String(bucket),
@@ -148,24 +148,4 @@ func ObjectExists(key, bucket string) (bool, error) {
 		return false, nil
 	}
 	return true, nil
-}
-
-func getSession() (*s3.Client, error) {
-	sessionToken := os.Getenv("AWS_SESSION_TOKEN")
-	if sessionToken == "" {
-		cfg, err := config.LoadDefaultConfig(context.TODO())
-		if err != nil {
-			return nil, err
-		}
-		return s3.NewFromConfig(cfg), nil
-	}
-	session := s3.NewFromConfig(aws.Config{
-		Region: os.Getenv("AWS_REGION"),
-		Credentials: credentials.NewStaticCredentialsProvider(
-			os.Getenv("AWS_ACCESS_KEY_ID"),
-			os.Getenv("AWS_SECRET_ACCESS_KEY"),
-			os.Getenv("AWS_SESSION_TOKEN"),
-		),
-	})
-	return session, nil
 }
