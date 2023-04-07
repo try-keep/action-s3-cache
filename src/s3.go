@@ -145,7 +145,6 @@ func ObjectExists(key, bucket string) (bool, error) {
 	}
 
 	if _, err = session.HeadObject(context.TODO(), i); err != nil {
-		log.Print(err)
 		return false, nil
 	}
 	return true, nil
@@ -153,15 +152,13 @@ func ObjectExists(key, bucket string) (bool, error) {
 
 func getSession() (*s3.Client, error) {
 	sessionToken := os.Getenv("AWS_SESSION_TOKEN")
-	if sessionToken != "" {
+	if sessionToken == "" {
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		if err != nil {
 			return nil, err
 		}
-		log.Print("LoadDefaultConfig")
 		return s3.NewFromConfig(cfg), nil
 	}
-	log.Print("Static creds")
 	session := s3.NewFromConfig(aws.Config{
 		Region: os.Getenv("AWS_REGION"),
 		Credentials: credentials.NewStaticCredentialsProvider(
