@@ -20,9 +20,11 @@ func Zip(filename string, artifacts []string) error {
 	// tar + gzip
 	var buf bytes.Buffer
 	zr := gzip.NewWriter(&buf)
+	zr.SetConcurrency(100000, 10)
 	tw := tar.NewWriter(zr)
 
 	for _, pattern := range artifacts {
+		log.Printf("Zipping pattern: %s", pattern)
 		matches, err := filepath.Glob(pattern)
 		if err != nil {
 			return err
@@ -35,6 +37,8 @@ func Zip(filename string, artifacts []string) error {
 				if err != nil {
 					return err
 				}
+
+				log.Printf("File: %s", file)
 
 				// must provide real name
 				// (see https://golang.org/src/archive/tar/common.go?#L626)

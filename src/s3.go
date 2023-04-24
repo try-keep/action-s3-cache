@@ -11,6 +11,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
@@ -51,6 +52,12 @@ func PutObject(key, bucket, s3Class string) error {
 		return err
 	}
 
+	uploader := manager.NewUploader(session, func(u *manager.Uploader) {
+		u.PartSize = 10 * 1024 * 1024 // 10 MiB
+		u.Concurrency = 4
+		u.MaxUploadParts = 50
+	})
+
 	file, err := os.Open(key)
 	if err != nil {
 		return err
@@ -61,16 +68,14 @@ func PutObject(key, bucket, s3Class string) error {
 		return err
 	}
 
-	i := &s3.PutObjectInput{
+	start := time.Now()
+	log.Printf("Uploading %v worth of cache", getReadableBytes(fileSize.Size()))
+	_, err = uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket:       aws.String(bucket),
 		Key:          aws.String(key),
 		Body:         file,
 		StorageClass: types.StorageClass(s3Class),
-	}
-
-	start := time.Now()
-	log.Printf("Uploading %v worth of cache", getReadableBytes(fileSize.Size()))
-	_, err = session.PutObject(context.TODO(), i)
+	})
 	if err == nil {
 		elapsed := time.Since(start)
 		log.Printf("Cache saved successfully in %s!", elapsed)
