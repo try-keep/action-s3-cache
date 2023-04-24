@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"io"
 	"log"
 	"os"
 	"sort"
@@ -54,7 +53,7 @@ func PutObject(key, bucket, s3Class string) error {
 
 	uploader := manager.NewUploader(session, func(u *manager.Uploader) {
 		u.PartSize = 10 * 1024 * 1024 // 10 MiB
-		u.Concurrency = 4
+		u.Concurrency = 5
 		u.MaxUploadParts = 50
 	})
 
@@ -92,26 +91,34 @@ func GetObject(key, bucket string) error {
 		return err
 	}
 
-	session := s3.NewFromConfig(cfg)
-
-	i := &s3.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-	}
-
-	object, err := session.GetObject(context.TODO(), i)
-	if err != nil {
-		return err
-	}
 	outFile, err := os.Create(key)
 	if err != nil {
 		return err
 	}
-
 	defer outFile.Close()
-	_, err = io.Copy(outFile, object.Body)
-	elapsed := time.Since(start)
-	log.Printf("%s worth of cache successfully downloaded in %s", getReadableBytes(object.ContentLength), elapsed)
+
+	session := s3.NewFromConfig(cfg)
+	downloader := manager.NewDownloader(session)
+
+	_, err = downloader.Download(context.TODO(), outFile, &s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	}, func(d *manager.Downloader) {
+		// Set the number of workers and part size
+		d.Concurrency = 5
+		d.PartSize = 5 * 1024 * 1024
+	})
+
+	if err != nil {
+		return err
+	}
+
+	fileSize, err := outFile.Stat()
+	if err == nil {
+		elapsed := time.Since(start)
+		log.Printf("%s worth of cache successfully downloaded in %s", getReadableBytes(fileSize.Size()), elapsed)
+	}
+
 	return err
 }
 
