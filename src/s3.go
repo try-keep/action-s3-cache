@@ -132,8 +132,8 @@ func DeleteObject(key string, bucket string) error {
 
 	objProps, err := ObjectProperties(key, bucket)
 	if err != nil || objProps == nil {
-		log.Printf("Cannot delete %s because it likely does not exist - %s", key, err)
-		return nil
+		log.Printf("Cannot delete %s because it likely does not exist", key)
+		return err
 	}
 
 	i := &s3.DeleteObjectInput{
