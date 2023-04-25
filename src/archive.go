@@ -138,6 +138,11 @@ func Unzip(filename string) error {
 				log.Printf("Failed copying contents to %s", target)
 				panic(err)
 			}
+			err = os.Chtimes(header.Name, header.AccessTime, header.ModTime)
+			if err != nil {
+				log.Printf("Failed setting timestamps to %s", target)
+				panic(err)
+			}
 			// manually close here after each file operation; defering would cause each file close
 			// to wait until all operations have completed.
 			fileToWrite.Close()
