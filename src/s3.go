@@ -15,7 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
-func GetLatestObject(key, bucket string) (string, error) {
+func GetLatestObject(key string, bucket string) (string, error) {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	session := s3.NewFromConfig(cfg)
 	if err != nil {
@@ -44,7 +44,7 @@ func GetLatestObject(key, bucket string) (string, error) {
 }
 
 // PutObject - Upload object to s3 bucket
-func PutObject(key, bucket, s3Class string) error {
+func PutObject(key string, bucket string, s3Class string) error {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	session := s3.NewFromConfig(cfg)
 	if err != nil {
@@ -77,14 +77,14 @@ func PutObject(key, bucket, s3Class string) error {
 	})
 	if err == nil {
 		elapsed := time.Since(start)
-		log.Printf("Cache saved successfully in %s!", elapsed)
+		log.Printf("Cache saved %s (%s) successfully in %s!", key, getReadableBytes(fileSize.Size()), elapsed)
 	}
 
 	return err
 }
 
 // GetObject - Get object from s3 bucket
-func GetObject(key, bucket string) error {
+func GetObject(key string, bucket string) error {
 	start := time.Now()
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
@@ -116,19 +116,25 @@ func GetObject(key, bucket string) error {
 	fileSize, err := outFile.Stat()
 	if err == nil {
 		elapsed := time.Since(start)
-		log.Printf("%s worth of cache successfully downloaded in %s", getReadableBytes(fileSize.Size()), elapsed)
+		log.Printf("%s (%s) successfully downloaded in %s", key, getReadableBytes(fileSize.Size()), elapsed)
 	}
 
 	return err
 }
 
 // DeleteObject - Delete object from s3 bucket
-func DeleteObject(key, bucket string) error {
+func DeleteObject(key string, bucket string) error {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		return err
 	}
 	session := s3.NewFromConfig(cfg)
+
+	objProps, err := ObjectProperties(key, bucket)
+	if err != nil || objProps == nil {
+		log.Printf("Cannot delete %s because it likely does not exist - %s", key, err)
+		return nil
+	}
 
 	i := &s3.DeleteObjectInput{
 		Bucket: aws.String(bucket),
@@ -137,17 +143,17 @@ func DeleteObject(key, bucket string) error {
 
 	_, err = session.DeleteObject(context.TODO(), i)
 	if err == nil {
-		log.Printf("Cache deleted %s successfully", key)
+		log.Printf("Cache deleted %s (%s) successfully", key, getReadableBytes(objProps.ContentLength))
 	}
 
 	return err
 }
 
-// ObjectExists - Verify if object exists in s3
-func ObjectExists(key, bucket string) (bool, error) {
+// ObjectProperties - Get object properties in s3
+func ObjectProperties(key string, bucket string) (*s3.HeadObjectOutput, error) {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	session := s3.NewFromConfig(cfg)
 
@@ -156,7 +162,14 @@ func ObjectExists(key, bucket string) (bool, error) {
 		Key:    aws.String(key),
 	}
 
-	if _, err = session.HeadObject(context.TODO(), i); err != nil {
+	headObjectOutput, err := session.HeadObject(context.TODO(), i)
+	return headObjectOutput, err
+}
+
+func ObjectExists(key string, bucket string) (bool, error) {
+	headObjectOutput, err := ObjectProperties(key, bucket)
+	if err != nil || headObjectOutput == nil {
+		// Intentionally return error nil, this is just an exists/does not exist check
 		return false, nil
 	}
 	return true, nil
