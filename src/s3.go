@@ -137,7 +137,7 @@ func DeleteObject(key, bucket string) error {
 
 	_, err = session.DeleteObject(context.TODO(), i)
 	if err == nil {
-		log.Print("Cache purged successfully")
+		log.Printf("Cache deleted %s successfully", key)
 	}
 
 	return err

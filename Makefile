@@ -15,8 +15,8 @@ build-dist: fmt vet
 .PHONY: build-dist
 
 tag:
-	git tag -a v$(VERSION) -m "Version $(VERSION)"
-	git push --tags
+	git tag --force -a v$(VERSION) -m "Version $(VERSION)"
+	git push --force --tags
 .PHONY: tag
 
 run-local:
