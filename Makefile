@@ -1,6 +1,14 @@
 VERSION := $(shell cat version.txt)
 
-build-dist:
+fmt:
+	go fmt ./...
+.PHONY: fmt
+
+vet:
+	go vet ./...
+.PHONY: vet
+
+build-dist: fmt vet
 	env GOOS=linux GOARCH=amd64 go build -o dist/linux ./src
 	env GOOS=windows GOARCH=amd64 go build -o dist/windows ./src
 	env GOOS=darwin GOARCH=amd64 go build -o dist/macos ./src

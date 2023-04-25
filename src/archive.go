@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
-	gzip "github.com/klauspost/pgzip"
+	zstd "github.com/klauspost/compress/zstd"
 )
 
 // Zip - Create .zip file and add dirs and files that match glob patterns
@@ -19,9 +19,11 @@ func Zip(filename string, artifacts []string) error {
 	log.Printf("Starting to zip: %s", filename)
 	// tar + gzip
 	var buf bytes.Buffer
-	zr := gzip.NewWriter(&buf)
-	zr.SetConcurrency(100000, 10)
-	tw := tar.NewWriter(zr)
+	zw, err := zstd.NewWriter(&buf, zstd.WithEncoderConcurrency(5))
+	if err != nil {
+		return err
+	}
+	tw := tar.NewWriter(zw)
 
 	for _, pattern := range artifacts {
 		log.Printf("Zipping pattern: %s", pattern)
@@ -69,7 +71,7 @@ func Zip(filename string, artifacts []string) error {
 		return err
 	}
 	// produce gzip
-	if err := zr.Close(); err != nil {
+	if err := zw.Close(); err != nil {
 		return err
 	}
 
@@ -101,12 +103,12 @@ func Unzip(filename string) error {
 		return err
 	}
 
-	gzipReader, err := gzip.NewReader(file)
+	zr, err := zstd.NewReader(file, zstd.WithDecoderConcurrency(5))
 	if err != nil {
 		return err
 	}
 
-	tarReader := tar.NewReader(gzipReader)
+	tarReader := tar.NewReader(zr)
 
 	for {
 		header, err := tarReader.Next()
