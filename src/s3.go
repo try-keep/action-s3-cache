@@ -15,8 +15,16 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
+func GetRegion() string {
+	region := os.Getenv("AWS_REGION")
+	if region == "" {
+		return "us-east-1"
+	}
+	return region
+}
+
 func GetLatestObject(key string, bucket string) (string, error) {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(GetRegion()))
 	session := s3.NewFromConfig(cfg)
 	if err != nil {
 		return "", err
@@ -45,7 +53,7 @@ func GetLatestObject(key string, bucket string) (string, error) {
 
 // PutObject - Upload object to s3 bucket
 func PutObject(key string, bucket string, s3Class string) error {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(GetRegion()))
 	session := s3.NewFromConfig(cfg)
 	if err != nil {
 		return err
@@ -86,7 +94,7 @@ func PutObject(key string, bucket string, s3Class string) error {
 // GetObject - Get object from s3 bucket
 func GetObject(key string, bucket string) error {
 	start := time.Now()
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(GetRegion()))
 	if err != nil {
 		return err
 	}
@@ -124,7 +132,7 @@ func GetObject(key string, bucket string) error {
 
 // DeleteObject - Delete object from s3 bucket
 func DeleteObject(key string, bucket string) error {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(GetRegion()))
 	if err != nil {
 		return err
 	}
@@ -151,7 +159,7 @@ func DeleteObject(key string, bucket string) error {
 
 // ObjectProperties - Get object properties in s3
 func ObjectProperties(key string, bucket string) (*s3.HeadObjectOutput, error) {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(GetRegion()))
 	if err != nil {
 		return nil, err
 	}
